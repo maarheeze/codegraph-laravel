@@ -31,7 +31,8 @@
         "illuminate/console": "^13.0",
         "illuminate/support": "^13.0",
         "maarheeze/codegraph": "^1.1",
-        "nikic/php-parser": "^5.7"
+        "nikic/php-parser": "^5.7",
+        "webmozart/assert": "^2.4"
     },
     "require-dev": {
         "maarheeze/phpcs": "^1.0",

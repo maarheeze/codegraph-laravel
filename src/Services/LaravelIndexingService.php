@@ -4,23 +4,16 @@ declare(strict_types=1);
 
 namespace Maarheeze\CodeGraph\Laravel\Services;
 
-use Maarheeze\CodeGraph\Laravel\LaravelPlugin;
-use Maarheeze\CodeGraph\Plugin\PluginRegistry;
-use Maarheeze\CodeGraph\Services\IndexingService;
+use Maarheeze\CodeGraph\CodeGraph;
+use Maarheeze\CodeGraph\Paths;
+use Throwable;
+
+use function is_dir;
+use function sprintf;
+use function str_contains;
 
 final readonly class LaravelIndexingService
 {
-    private IndexingService $coreService;
-
-    public function __construct(
-        ?PluginRegistry $pluginRegistry = null,
-    ) {
-        $registry = $pluginRegistry ?? new PluginRegistry();
-        $registry->register(new LaravelPlugin());
-
-        $this->coreService = new IndexingService($registry);
-    }
-
     /**
      * @param array<int, string> $scanPaths
      * @param array<int, string> $excludes
@@ -32,11 +25,37 @@ final readonly class LaravelIndexingService
         array $scanPaths = ['app'],
         array $excludes = ['vendor', 'storage', 'node_modules'],
     ): array {
-        return $this->coreService->run(
-            $projectRoot,
-            $databasePath,
-            $scanPaths,
-            $excludes,
-        );
+        $cgDir = Paths::directoryPath($projectRoot);
+
+        if (!is_dir($cgDir)) {
+            return [
+                'lines' => [],
+                'error' => 'CodeGraph not initialized. Run <fg=blue>php artisan codegraph:init</> first.',
+            ];
+        }
+
+        try {
+            $graph = new CodeGraph($projectRoot, $databasePath, $scanPaths, $excludes);
+            $stats = $graph->index();
+
+            $lines = [
+                sprintf('Indexed %d symbols', $stats->getSymbolsEmitted()),
+                sprintf('Found %d edges', $stats->getEdgesEmitted()),
+                sprintf('Processed %d chunks', $stats->getChunksEmitted()),
+                sprintf('Scanned %d files', $stats->getFilesScanned()),
+                sprintf('Duration: %.2fs', $stats->getDurationSeconds()),
+            ];
+
+            return ['lines' => $lines, 'error' => null];
+        } catch (Throwable $e) {
+            if (str_contains($e->getMessage(), 'unable to open database file')) {
+                return [
+                    'lines' => [],
+                    'error' => 'CodeGraph database not found. Run <fg=blue>php artisan codegraph:init</> first.',
+                ];
+            }
+
+            return ['lines' => [], 'error' => $e->getMessage()];
+        }
     }
 }
