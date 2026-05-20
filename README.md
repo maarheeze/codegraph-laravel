@@ -33,7 +33,7 @@ This package extends CodeGraph with Laravel-aware extraction:
 ## Installation
 
 ```bash
-composer require maarheeze/codegraph-laravel
+composer require maarheeze/codegraph-laravel --dev
 ```
 
 The package auto-registers via Laravel's service provider system. No additional configuration needed.
@@ -46,7 +46,7 @@ The package auto-registers via Laravel's service provider system. No additional 
 php artisan codegraph:index
 ```
 
-Scans your `app/` and `routes/` directories and extracts all Laravel patterns into `.codegraph/index.sqlite`.
+Scans your `app/` and `routes/` directories and extracts all Laravel patterns into `.codegraph/index.sqlite`. This directory is auto-generated and should be added to `.gitignore`.
 
 ### View Indexing Status
 
@@ -55,6 +55,23 @@ php artisan codegraph:status
 ```
 
 Shows what was extracted: routes, relations, service bindings, and other patterns.
+
+### Automatic Indexing on Install
+
+To automatically initialize and index your codebase after dependencies are installed or updated, add the following to your `composer.json`:
+
+```json
+{
+  "scripts": {
+    "post-autoload-dump": [
+      "@php artisan codegraph:init",
+      "@php artisan codegraph:index"
+    ]
+  }
+}
+```
+
+This ensures your code graph is initialized and stays in sync whenever dependencies change or the codebase is freshly checked out.
 
 ## Architecture
 
