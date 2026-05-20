@@ -30,7 +30,7 @@
         "php": "^8.3",
         "illuminate/console": "^13.0",
         "illuminate/support": "^13.0",
-        "maarheeze/codegraph": "^1.1",
+        "maarheeze/codegraph": "^1.2",
         "nikic/php-parser": "^5.7",
         "webmozart/assert": "^2.4"
     },
