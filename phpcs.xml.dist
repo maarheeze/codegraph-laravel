@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="phpcs">
+    <description>phpcs</description>
+    <arg value="sp"/>
+    <arg name="colors"/>
+    <arg name="cache" value=".phpcs.cache"/>
+    <arg name="extensions" value="php"/>
+
+    <file>.</file>
+    <exclude-pattern>./vendor</exclude-pattern>
+
+    <rule ref="maarheeze"/>
+</rule>
