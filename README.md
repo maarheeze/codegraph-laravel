@@ -66,8 +66,8 @@ To automatically initialize and index your codebase after dependencies are insta
 {
   "scripts": {
     "post-autoload-dump": [
-      "@php artisan codegraph:init",
-      "@php artisan codegraph:index"
+      "@php artisan codegraph:init || true",
+      "@php artisan codegraph:index || true"
     ]
   }
 }
