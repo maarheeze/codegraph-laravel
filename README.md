@@ -1,24 +1,26 @@
 # maarheeze/codegraph-laravel
 
-**Automated code indexing and navigation for Laravel applications.**
+**Instant code understanding for Laravel applications.**
 
-This package extends [maarheeze/codegraph](https://github.com/maarheeze/codegraph) with Laravel-specific extractors, automatically building a complete, queryable graph of your codebase. Understand relationships, dependencies, and call chains instantly—without manual mapping or slow IDE searches.
+This package extends [maarheeze/codegraph](https://github.com/maarheeze/codegraph) to automatically extract and index Laravel patterns—routes, models, services, and dependencies. Understand your codebase instantly without guessing, grepping, or slow IDE searches.
 
 ## Why Use It?
 
-**Stop guessing about your codebase.**
+**Answer questions about your Laravel app in milliseconds.**
 
-- **Instant Navigation** — Find where a service is bound, where a model relation is defined, where a route leads—in milliseconds
-- **Impact Analysis** — Know exactly what breaks when you change a class or service
-- **Automated Relationship Mapping** — Extract routes, model relations, service bindings automatically from your code
-- **IDE-Ready Data** — Structured, queryable data for tooling and IDE integration
-- **Fast, Offline** — Index once, query offline. No running application needed
-- **AST-Based Accuracy** — Parse the actual code structure, not regex or heuristics
+- **Where is X bound?** — Find service bindings instantly
+- **What breaks if I change this?** — See all callers, relations, and dependents
+- **How does this route work?** — Trace the full call chain from route → controller → models → queries
+- **Where is this model used?** — Find all relations and eager-loading patterns
+- **What models relate to this one?** — See all hasMany, belongsTo, morphs, and polymorphic relations at a glance
 
-**Result:**
-- ⚡ **Faster** — Queries in milliseconds instead of reading files
-- 💰 **Cheaper** — Use fewer tokens, no need to pass file contents  
-- 🔍 **Accurate** — Structured data about code relationships, not guesses
+**How it helps:**
+
+- ⚡ **Faster refactoring** — Know exactly what breaks before you change it
+- 💰 **Cheaper AI assistance** — Feed Claude accurate, structured data instead of raw file contents
+- 🔍 **Offline navigation** — No IDE plugin or running app needed; index once, query forever
+- ✨ **Automatic extraction** — No manual mapping; parses your actual code structure (AST-based, not regex)
+- 🤖 **Works with Claude Code, Cursor, and any AI** — MCP protocol integration for context-aware code assistance
 
 ## What It Extracts
 
