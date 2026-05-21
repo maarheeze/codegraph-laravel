@@ -44,11 +44,19 @@ The package auto-registers via Laravel's service provider system. No additional 
 
 ### Index Your Application
 
+First, initialize the index:
+
+```bash
+php artisan codegraph:init
+```
+
+Then, index your application:
+
 ```bash
 php artisan codegraph:index
 ```
 
-Scans your `app/` and `routes/` directories and extracts all Laravel patterns into `.codegraph/index.sqlite`. This directory is auto-generated and should be added to `.gitignore`.
+The `init` command sets up the `.codegraph/index.sqlite` file. The `index` command scans your `app/` and `routes/` directories and extracts all Laravel patterns into it. This directory is auto-generated and should be added to `.gitignore`.
 
 ### View Indexing Status
 
@@ -57,6 +65,51 @@ php artisan codegraph:status
 ```
 
 Shows what was extracted: routes, relations, service bindings, and other patterns.
+
+## Using Your Index
+
+Once indexed, your code graph is ready to use:
+
+- **With Claude Code** — The index integrates via MCP; Claude Code can now answer questions about your codebase with full context
+- **With Cursor, VS Code, or any IDE** — Use the index to answer "where is X bound?", "what calls this?", or "what breaks if I change this?"
+- **Programmatically** — Query the SQLite index directly for custom tools and workflows
+
+The index updates automatically as you edit files (via watch mode), keeping your code understanding always in sync.
+
+### MCP Tools for Claude Code
+
+Once indexed, you can use the package with Claude Code via the MCP (Model Context Protocol) server:
+
+```bash
+codegraph mcp --root .
+```
+
+This exposes **3 Laravel-specific MCP tools** that Claude Code can use to understand your codebase:
+
+#### `codegraph_find_route`
+Find Laravel routes by URL pattern or name.
+```
+Pattern: "users" → Returns all routes matching "users"
+Pattern: "user.show" → Returns the named route "user.show"
+```
+**Returns:** Route path, HTTP method, controller method, file location
+
+#### `codegraph_find_model`
+Find Eloquent models and their relations.
+```
+Name: "User" → Returns the User model with all its relations
+```
+**Returns:** Model FQN, file path, all hasMany/belongsTo/morphs relations with related models
+
+#### `codegraph_find_service`
+Find service container bindings.
+```
+Name: "auth" → Returns all services bound to "auth"
+Name: "UserRepository" → Returns where UserRepository is bound
+```
+**Returns:** Binding key, concrete class, service provider, file location
+
+These tools work alongside CodeGraph's 5 core tools (search, callers, callees, blast_radius, search_chunks) to give Claude Code complete understanding of your Laravel application.
 
 ### Automatic Indexing on Install
 
