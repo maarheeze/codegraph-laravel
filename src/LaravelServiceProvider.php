@@ -7,6 +7,7 @@ namespace Maarheeze\CodeGraph\Laravel;
 use Illuminate\Support\ServiceProvider;
 use Maarheeze\CodeGraph\Laravel\Commands\IndexCommand;
 use Maarheeze\CodeGraph\Laravel\Commands\InitCommand;
+use Maarheeze\CodeGraph\Laravel\Commands\McpCommand;
 use Maarheeze\CodeGraph\Laravel\Commands\StatusCommand;
 use Maarheeze\CodeGraph\Laravel\Commands\WatchCommand;
 
@@ -23,6 +24,7 @@ final class LaravelServiceProvider extends ServiceProvider
             $this->commands([
                 IndexCommand::class,
                 InitCommand::class,
+                McpCommand::class,
                 StatusCommand::class,
                 WatchCommand::class,
             ]);
