@@ -70,21 +70,12 @@ Shows what was extracted: routes, relations, service bindings, and other pattern
 
 Once indexed, your code graph is ready to use:
 
-- **With Claude Code** — The index integrates via MCP; Claude Code can now answer questions about your codebase with full context
-- **With Cursor, VS Code, or any IDE** — Use the index to answer "where is X bound?", "what calls this?", or "what breaks if I change this?"
-- **Programmatically** — Query the SQLite index directly for custom tools and workflows
-
-The index updates automatically as you edit files (via watch mode), keeping your code understanding always in sync.
+- **With Claude Code** — Automatically configured. Open Claude Code and it will discover the MCP server. Use the 3 Laravel-specific tools below.
+- **Programmatically** — Query the SQLite index directly in `.codegraph/index.sqlite` for custom tools and workflows
 
 ### MCP Tools for Claude Code
 
-Once indexed, you can use the package with Claude Code via the MCP (Model Context Protocol) server:
-
-```bash
-codegraph mcp --root .
-```
-
-This exposes **3 Laravel-specific MCP tools** that Claude Code can use to understand your codebase:
+After running `codegraph:init` and `codegraph:index`, Claude Code automatically discovers and exposes **3 Laravel-specific MCP tools**:
 
 #### `codegraph_find_route`
 Find Laravel routes by URL pattern or name.
@@ -109,7 +100,7 @@ Name: "UserRepository" → Returns where UserRepository is bound
 ```
 **Returns:** Binding key, concrete class, service provider, file location
 
-These tools work alongside CodeGraph's 5 core tools (search, callers, callees, blast_radius, search_chunks) to give Claude Code complete understanding of your Laravel application.
+These tools work alongside CodeGraph's 5 core tools (search, callers, callees, blast_radius, search_chunks) to give Claude Code complete understanding of your Laravel application. The MCP server is automatically started based on your environment (Sail, Docker, or plain PHP) as detected during `codegraph:init`.
 
 ### Automatic Indexing on Install
 

@@ -6,7 +6,7 @@ namespace Maarheeze\CodeGraph\Laravel\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Foundation\Application;
-use Maarheeze\CodeGraph\Services\InitializationService;
+use Maarheeze\CodeGraph\Laravel\Services\LaravelInitializationService;
 use Webmozart\Assert\Assert;
 
 final class InitCommand extends Command
@@ -20,7 +20,7 @@ final class InitCommand extends Command
         $mcpConfig = $this->option('mcp-config');
         Assert::string($mcpConfig);
 
-        $service = new InitializationService();
+        $service = new LaravelInitializationService();
         $result = $service->run($basePath, $mcpConfig);
 
         if ($result['error'] !== null) {
