@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Maarheeze\CodeGraph\Laravel\Services;
 
 use Maarheeze\CodeGraph\CodeGraph;
+use Maarheeze\CodeGraph\Laravel\LaravelPlugin;
 use Maarheeze\CodeGraph\Paths;
 use Throwable;
 
@@ -36,6 +37,7 @@ final readonly class LaravelIndexingService
 
         try {
             $graph = new CodeGraph($projectRoot, $databasePath, $scanPaths, $excludes);
+            $graph->registerPlugin(new LaravelPlugin());
             $stats = $graph->index();
 
             $lines = [

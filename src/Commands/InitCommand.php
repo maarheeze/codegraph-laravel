@@ -32,6 +32,12 @@ final class InitCommand extends Command
             $this->line($line);
         }
 
+        $this->call('vendor:publish', [
+            '--provider' => 'Maarheeze\\CodeGraph\\Laravel\\LaravelServiceProvider',
+            '--tag' => 'ai-routes',
+            '--force' => true,
+        ]);
+
         return self::SUCCESS;
     }
 }

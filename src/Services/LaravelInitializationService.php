@@ -83,30 +83,30 @@ final readonly class LaravelInitializationService
         }
 
         $section = <<<'MD'
-		<!-- codegraph -->
-		## CodeGraph
+<!-- codegraph -->
+## CodeGraph
 
-		This project has CodeGraph installed with a pre-built index of all PHP symbols
-		and their call graph relationships.
+This project has CodeGraph installed with a pre-built index of all PHP symbols
+and their call graph relationships.
 
-		**CRITICAL:** For any question about code structure, relationships, or impact —
-		ALWAYS use the CodeGraph MCP tools. Do NOT use bash, grep, file search, or IDE
-		symbol search. The graph is faster, cheaper, and more accurate than text search.
+**CRITICAL:** For any question about code structure, relationships, or impact —
+ALWAYS use the CodeGraph MCP tools. Do NOT use bash, grep, file search, or IDE
+symbol search. The graph is faster, cheaper, and more accurate than text search.
 
-		### Decision Rules
+### Decision Rules
 
-		- "Where is X defined?" → `codegraph_search`
-		- "Where is X used?" / "Who calls X?" → `codegraph_callers`
-		- "What does X call?" / "What does X depend on?" → `codegraph_callees`
-		- "What breaks if I change X?" → `codegraph_blast_radius`
-		- "Where is string/pattern Y used?" → `codegraph_search_chunks`
+- "Where is X defined?" → `codegraph_search`
+- "Where is X used?" / "Who calls X?" → `codegraph_callers`
+- "What does X call?" / "What does X depend on?" → `codegraph_callees`
+- "What breaks if I change X?" → `codegraph_blast_radius`
+- "Where is string/pattern Y used?" → `codegraph_search_chunks`
 
-		### Workflow
+### Workflow
 
-		1. `codegraph_search(name)` → get exact FQN (e.g. `\App\Models\User`)
-		2. Use the appropriate relationship tool with that FQN
-		3. Only read files for implementation details not available in the index
-		<!-- /codegraph -->
+1. `codegraph_search(name)` → get exact FQN (e.g. `\App\Models\User`)
+2. Use the appropriate relationship tool with that FQN
+3. Only read files for implementation details not available in the index
+<!-- /codegraph -->
 MD;
 
         $newContent = $claudeContent
@@ -221,7 +221,7 @@ MD;
         if ($mcpConfig === 'sail') {
             return [
                 'command' => 'vendor/bin/sail',
-                'args' => ['php', 'artisan', 'codegraph:mcp', '--root=.'],
+                'args' => ['artisan', 'mcp:start', 'codegraph'],
             ];
         }
 
@@ -235,8 +235,8 @@ MD;
                     'laravel.test',
                     'php',
                     'artisan',
-                    'codegraph:mcp',
-                    '--root=.',
+                    'mcp:start',
+                    'codegraph',
                 ],
             ];
         }
@@ -244,7 +244,7 @@ MD;
         if ($mcpConfig === 'php') {
             return [
                 'command' => 'php',
-                'args' => ['artisan', 'codegraph:mcp', '--root=.'],
+                'args' => ['artisan', 'mcp:start', 'codegraph'],
             ];
         }
 
@@ -254,7 +254,7 @@ MD;
         if (file_exists($sailPath)) {
             return [
                 'command' => 'vendor/bin/sail',
-                'args' => ['php', 'artisan', 'codegraph:mcp', '--root=.'],
+                'args' => ['artisan', 'mcp:start', 'codegraph'],
             ];
         }
 
@@ -268,15 +268,15 @@ MD;
                     'laravel.test',
                     'php',
                     'artisan',
-                    'codegraph:mcp',
-                    '--root=.',
+                    'mcp:start',
+                    'codegraph',
                 ],
             ];
         }
 
         return [
             'command' => 'php',
-            'args' => ['artisan', 'codegraph:mcp', '--root=.'],
+            'args' => ['artisan', 'mcp:start', 'codegraph'],
         ];
     }
 }

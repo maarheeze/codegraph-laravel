@@ -42,9 +42,9 @@ The package auto-registers via Laravel's service provider system. No additional 
 
 ## Usage
 
-### Index Your Application
+### Initialize and Index Your Application
 
-First, initialize the index:
+First, initialize CodeGraph and publish the MCP routes:
 
 ```bash
 php artisan codegraph:init
@@ -56,7 +56,14 @@ Then, index your application:
 php artisan codegraph:index
 ```
 
-The `init` command sets up the `.codegraph/index.sqlite` file. The `index` command scans your `app/` and `routes/` directories and extracts all Laravel patterns into it. This directory is auto-generated and should be added to `.gitignore`.
+The `init` command:
+- Sets up the `.codegraph/index.sqlite` database
+- Auto-detects your environment (Sail, Docker, or plain PHP)
+- Generates `.mcp.json` with the correct startup command
+- Publishes `routes/ai.php` to register the MCP server
+- Registers the CodeGraph MCP server in Claude Code settings
+
+The `index` command scans your `app/` and `routes/` directories and extracts all Laravel patterns into the database. This directory is auto-generated and should be added to `.gitignore`.
 
 ### View Indexing Status
 
@@ -70,12 +77,12 @@ Shows what was extracted: routes, relations, service bindings, and other pattern
 
 Once indexed, your code graph is ready to use:
 
-- **With Claude Code** — Automatically configured. Open Claude Code and it will discover the MCP server. Use the 3 Laravel-specific tools below.
+- **With Claude Code** — Automatically configured via `.mcp.json` and Laravel MCP. Open Claude Code and it will discover the MCP server and start it automatically. Claude Code will proactively offer the 3 Laravel-specific tools below when you ask questions about your codebase.
 - **Programmatically** — Query the SQLite index directly in `.codegraph/index.sqlite` for custom tools and workflows
 
 ### MCP Tools for Claude Code
 
-After running `codegraph:init` and `codegraph:index`, Claude Code automatically discovers and exposes **3 Laravel-specific MCP tools**:
+After running `codegraph:init` and `codegraph:index`, Claude Code has access to **3 Laravel-specific MCP tools** powered by Laravel MCP:
 
 #### `codegraph_find_route`
 Find Laravel routes by URL pattern or name.
@@ -100,7 +107,7 @@ Name: "UserRepository" → Returns where UserRepository is bound
 ```
 **Returns:** Binding key, concrete class, service provider, file location
 
-These tools work alongside CodeGraph's 5 core tools (search, callers, callees, blast_radius, search_chunks) to give Claude Code complete understanding of your Laravel application. The MCP server is automatically started based on your environment (Sail, Docker, or plain PHP) as detected during `codegraph:init`.
+These tools work alongside CodeGraph's 5 core tools (search, callers, callees, blast_radius, search_chunks) to give Claude Code complete understanding of your Laravel application. The MCP server is automatically started using Laravel's native MCP framework based on your environment (Sail, Docker, or plain PHP) as detected during `codegraph:init`.
 
 ### Automatic Indexing on Install
 
@@ -152,12 +159,6 @@ The index is **incremental** — subsequent runs only re-scan changed files, kee
 - **Documentation** — Auto-generate architecture diagrams from actual code
 - **IDE & Tools** — Integrate with Claude Code, custom scripts, or build tools for context-aware assistance
 - **Code Review** — Verify that refactors are complete and consistent
-
-## Requirements
-
-- PHP 8.3+
-- Laravel 13.0+
-- `ext-sqlite3` extension
 
 ## License
 
