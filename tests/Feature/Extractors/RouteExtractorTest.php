@@ -23,8 +23,10 @@ final class RouteExtractorTest extends TestCase
 
         $this->assertCount(1, $edges);
         $this->assertEquals('route', $edges[0]->kind);
-        $this->assertEquals('route:GET:/users', $edges[0]->sourceFullyQualifiedName);
+        $this->assertEquals('\\Route', $edges[0]->sourceFullyQualifiedName);
         $this->assertEquals('UserController@index', $edges[0]->destinationFullyQualifiedName);
+        $this->assertStringContainsString('method:GET', $edges[0]->metadata ?? '');
+        $this->assertStringContainsString('path:/users', $edges[0]->metadata ?? '');
     }
 
     public function testExtractsMultipleRoutes(): void
@@ -39,9 +41,12 @@ final class RouteExtractorTest extends TestCase
         $edges = $this->extract($code);
 
         $this->assertCount(3, $edges);
-        $this->assertEquals('route:GET:/users', $edges[0]->sourceFullyQualifiedName);
-        $this->assertEquals('route:POST:/users', $edges[1]->sourceFullyQualifiedName);
-        $this->assertEquals('route:DELETE:/users/{id}', $edges[2]->sourceFullyQualifiedName);
+        $this->assertEquals('\\Route', $edges[0]->sourceFullyQualifiedName);
+        $this->assertStringContainsString('method:GET', $edges[0]->metadata ?? '');
+        $this->assertEquals('\\Route', $edges[1]->sourceFullyQualifiedName);
+        $this->assertStringContainsString('method:POST', $edges[1]->metadata ?? '');
+        $this->assertEquals('\\Route', $edges[2]->sourceFullyQualifiedName);
+        $this->assertStringContainsString('method:DELETE', $edges[2]->metadata ?? '');
     }
 
     public function testExtractsRouteWithClassOnly(): void

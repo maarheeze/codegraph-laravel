@@ -61,7 +61,7 @@ final class RouteExtractor extends BaseAstVisitor
         if ($path && $controller) {
             $this->edgesList[] = new Edge(
                 'route',
-                sprintf('route:%s:%s', strtoupper($httpMethod), $path),
+                '\\Route',
                 $controller,
                 $this->relativeFilePath,
                 $node->getStartLine(),

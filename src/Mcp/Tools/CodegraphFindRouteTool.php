@@ -37,26 +37,31 @@ final class CodegraphFindRouteTool extends Tool
             $storage = $codeGraph->getStorage();
             $results = [];
 
-            $allSymbols = $storage->findByName('Route');
-            foreach ($allSymbols as $symbol) {
-                $edges = $storage->findEdgesFrom($symbol->fullyQualifiedName);
-                foreach ($edges as $edge) {
-                    if ($edge->kind === 'route' && $this->matchesPattern($edge->sourceFullyQualifiedName, $pattern)) {
-                        $metadata = $edge->metadata ?? '';
-                        $path = '';
+            $edges = $storage->findEdgesFrom('\\Route');
+            foreach ($edges as $edge) {
+                if ($edge->kind !== 'route') {
+                    continue;
+                }
 
-                        if (preg_match('/method:(\w+),path:([^,]+)/', $metadata, $matches)) {
-                            $path = $matches[2];
-                        }
+                $metadata = $edge->metadata ?? '';
+                $method = '';
+                $path = '';
 
-                        $results[] = [
-                            'name' => '',
-                            'path' => $path,
-                            'controller' => $edge->destinationFullyQualifiedName,
-                            'file' => $edge->file,
-                            'line' => $edge->line,
-                        ];
-                    }
+                if (preg_match('/method:(\w+),path:([^,]+)/', $metadata, $matches)) {
+                    $method = $matches[1];
+                    $path = $matches[2];
+                }
+
+                $controller = $edge->destinationFullyQualifiedName;
+
+                if ($this->matchesPattern($method, $path, $controller, $pattern)) {
+                    $results[] = [
+                        'method' => $method,
+                        'path' => $path,
+                        'controller' => $controller,
+                        'file' => $edge->file,
+                        'line' => $edge->line,
+                    ];
                 }
             }
 
@@ -72,17 +77,17 @@ final class CodegraphFindRouteTool extends Tool
     {
         return [
             'pattern' => $schema->string()
-                ->description('Route URL pattern or name to search for (e.g., "users", "user.show")')
+                ->description('Search by HTTP method (GET, POST), URL path, or controller name')
                 ->required(),
         ];
     }
 
-    private function matchesPattern(string $source, string $pattern): bool
+    private function matchesPattern(string $method, string $path, string $controller, string $pattern): bool
     {
         if ($pattern === '') {
             return true;
         }
 
-        return str_contains($source, $pattern);
+        return str_contains($method, $pattern) || str_contains($path, $pattern) || str_contains($controller, $pattern);
     }
 }
