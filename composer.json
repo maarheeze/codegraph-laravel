@@ -1,6 +1,7 @@
 {
     "name": "maarheeze/codegraph-laravel",
     "description": "laravel-specific extractors for codegraph code indexing",
+    "keywords": ["dev"],
     "type": "library",
     "license": "MIT",
     "config": {
