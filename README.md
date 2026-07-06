@@ -44,7 +44,7 @@ The package auto-registers via Laravel's service provider system. No additional 
 
 ### Initialize and Index Your Application
 
-First, initialize CodeGraph and publish the MCP routes:
+First, initialize CodeGraph:
 
 ```bash
 php artisan codegraph:init
@@ -56,14 +56,49 @@ Then, index your application:
 php artisan codegraph:index
 ```
 
+By default, `init` sets up the CLI integration — the cheapest path for AI assistants.
 The `init` command:
 - Sets up the `.codegraph/index.sqlite` database
-- Auto-detects your environment (Sail, Docker, or plain PHP)
-- Generates `.mcp.json` with the correct startup command
-- Publishes `routes/ai.php` to register the MCP server
-- Registers the CodeGraph MCP server in Claude Code settings
+- Adds a CodeGraph section to `CLAUDE.md` pointing at the CLI commands
+
+CLI mode does **not** write `.mcp.json`, publish `routes/ai.php`, or touch Claude Code
+settings. AI assistants discover the CLI once via `CLAUDE.md` and only spend tokens when they
+actually run a command — unlike MCP, whose tool definitions are loaded into context on every
+session whether they are used or not.
 
 The `index` command scans your `app/` and `routes/` directories and extracts all Laravel patterns into the database. This directory is auto-generated and should be added to `.gitignore`.
+
+### Querying the Index (CLI)
+
+The CLI ships with the core `maarheeze/codegraph` dependency and queries the same
+`.codegraph/index.sqlite` database that the Laravel indexer fills:
+
+```bash
+php vendor/bin/codegraph search <name>
+php vendor/bin/codegraph callers <fqn>
+php vendor/bin/codegraph callees <fqn>
+php vendor/bin/codegraph blast-radius <fqn> --depth=3
+php vendor/bin/codegraph search-chunks '<query>'
+```
+
+Each command prints JSON to stdout.
+
+### MCP Integration (opt-in)
+
+If you prefer the MCP integration, pass the `--mcp` flag:
+
+```bash
+php artisan codegraph:init --mcp
+```
+
+This restores the full MCP setup:
+- Auto-detects your environment (Sail, Docker, or plain PHP)
+- Generates `.mcp.json` with the correct startup command
+- Publishes `routes/ai.php` to register the Laravel-native MCP server
+- Registers the CodeGraph MCP server in Claude Code settings
+- Adds an MCP-flavored CodeGraph section to `CLAUDE.md`
+
+You can override environment detection with `--mcp-config=auto|sail|docker|php`.
 
 ### View Indexing Status
 
@@ -77,12 +112,13 @@ Shows what was extracted: routes, relations, service bindings, and other pattern
 
 Once indexed, your code graph is ready to use:
 
-- **With Claude Code** — Automatically configured via `.mcp.json` and Laravel MCP. Open Claude Code and it will discover the MCP server and start it automatically. Claude Code will proactively offer the 3 Laravel-specific tools below when you ask questions about your codebase.
+- **With the CLI (default)** — `CLAUDE.md` instructs Claude Code to query the graph via `php vendor/bin/codegraph …`. No always-on context cost.
+- **With MCP (opt-in)** — After `codegraph:init --mcp`, Claude Code discovers the MCP server via `.mcp.json` and Laravel MCP and proactively offers the 3 Laravel-specific tools below.
 - **Programmatically** — Query the SQLite index directly in `.codegraph/index.sqlite` for custom tools and workflows
 
 ### MCP Tools for Claude Code
 
-After running `codegraph:init` and `codegraph:index`, Claude Code has access to **3 Laravel-specific MCP tools** powered by Laravel MCP:
+After running `codegraph:init --mcp` and `codegraph:index`, Claude Code has access to **3 Laravel-specific MCP tools** powered by Laravel MCP:
 
 #### `codegraph_find_route`
 Find Laravel routes by URL pattern or name.
@@ -107,7 +143,19 @@ Name: "UserRepository" → Returns where UserRepository is bound
 ```
 **Returns:** Binding key, concrete class, service provider, file location
 
-These tools work alongside CodeGraph's 5 core tools (search, callers, callees, blast_radius, search_chunks) to give Claude Code complete understanding of your Laravel application. The MCP server is automatically started using Laravel's native MCP framework based on your environment (Sail, Docker, or plain PHP) as detected during `codegraph:init`.
+These tools work alongside CodeGraph's 5 core tools (search, callers, callees, blast_radius, search_chunks) to give Claude Code complete understanding of your Laravel application. The MCP server is automatically started using Laravel's native MCP framework based on your environment (Sail, Docker, or plain PHP) as detected during `codegraph:init --mcp`.
+
+### Migrating from MCP to the CLI
+
+MCP tool definitions are loaded into the AI assistant's context on every session, whether or
+not they are used. The CLI is discovered once via `CLAUDE.md` and only costs tokens when a
+command actually runs. To switch an existing MCP setup over to the CLI:
+
+1. Remove the `<!-- codegraph -->` … `<!-- /codegraph -->` block from `CLAUDE.md`.
+2. Delete the `codegraph` entry from `.mcp.json`.
+3. Remove `codegraph` from `enabledMcpjsonServers` in `.claude/settings.local.json`.
+4. Remove (or guard) the published `routes/ai.php` MCP registration.
+5. Re-run `php artisan codegraph:init`.
 
 ### Automatic Indexing on Install
 

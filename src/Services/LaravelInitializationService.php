@@ -30,7 +30,7 @@ final readonly class LaravelInitializationService
     /**
      * @return array{lines: array<int, string>, error: ?string}
      */
-    public function run(string $projectRoot, string $mcpConfig = 'auto'): array
+    public function run(string $projectRoot, bool $registerMcp = false, string $mcpConfig = 'auto'): array
     {
         $lines = [];
 
@@ -43,8 +43,15 @@ final readonly class LaravelInitializationService
         CodeGraph::forProject($projectRoot);
         $lines[] = sprintf('<info>Initialized CodeGraph database at: %s</info>', $cgDir);
 
-        $this->addClaudemdGuidelines($projectRoot);
+        $this->addClaudemdGuidelines($projectRoot, $registerMcp);
         $lines[] = '<info>Added CodeGraph guidelines to CLAUDE.md</info>';
+
+        if (!$registerMcp) {
+            return [
+                'lines' => $lines,
+                'error' => null,
+            ];
+        }
 
         $this->registerMcpServer($projectRoot, $mcpConfig);
         $lines[] = '<info>Registered CodeGraph MCP server in .mcp.json</info>';
@@ -69,7 +76,7 @@ final readonly class LaravelInitializationService
         CodeGraph::forProject($projectRoot);
     }
 
-    public function addClaudemdGuidelines(string $projectRoot): void
+    public function addClaudemdGuidelines(string $projectRoot, bool $useMcp): void
     {
         $claudeMdPath = sprintf('%s/CLAUDE.md', $projectRoot);
         $claudeContent = '';
@@ -82,7 +89,48 @@ final readonly class LaravelInitializationService
             return;
         }
 
-        $section = <<<'MD'
+        $section = $useMcp ? $this->mcpGuidelines() : $this->cliGuidelines();
+
+        $newContent = $claudeContent
+            ? sprintf("%s\n\n%s", $claudeContent, $section)
+            : sprintf('%s%s', $section, PHP_EOL);
+        file_put_contents($claudeMdPath, $newContent);
+    }
+
+    private function cliGuidelines(): string
+    {
+        return <<<'MD'
+<!-- codegraph -->
+## CodeGraph
+
+This project has CodeGraph installed with a pre-built index of all PHP symbols
+and their call graph relationships.
+
+**CRITICAL:** For any question about code structure, relationships, or impact —
+ALWAYS use the CodeGraph CLI. Do NOT use grep, file search, or IDE symbol
+search. The graph is faster, cheaper, and more accurate than text search.
+
+### Decision Rules
+
+- "Where is X defined?" → `php vendor/bin/codegraph search <name>`
+- "Where is X used?" / "Who calls X?" → `php vendor/bin/codegraph callers <fqn>`
+- "What does X call?" / "What does X depend on?" → `php vendor/bin/codegraph callees <fqn>`
+- "What breaks if I change X?" → `php vendor/bin/codegraph blast-radius <fqn> --depth=3`
+- "Where is string/pattern Y used?" → `php vendor/bin/codegraph search-chunks '<query>'`
+
+### Workflow
+
+1. `php vendor/bin/codegraph search <name>` → get exact FQN (e.g. `\App\Models\User`)
+2. Run the appropriate relationship command with that FQN
+3. Each command prints JSON to stdout — parse it directly
+4. Only read files for implementation details not available in the index
+<!-- /codegraph -->
+MD;
+    }
+
+    private function mcpGuidelines(): string
+    {
+        return <<<'MD'
 <!-- codegraph -->
 ## CodeGraph
 
@@ -108,11 +156,6 @@ symbol search. The graph is faster, cheaper, and more accurate than text search.
 3. Only read files for implementation details not available in the index
 <!-- /codegraph -->
 MD;
-
-        $newContent = $claudeContent
-            ? sprintf("%s\n\n%s", $claudeContent, $section)
-            : sprintf('%s%s', $section, PHP_EOL);
-        file_put_contents($claudeMdPath, $newContent);
     }
 
     private function registerMcpServer(string $projectRoot, string $mcpConfig = 'auto'): void
@@ -152,6 +195,11 @@ MD;
 
     private function registerClaudeCodeMcpServer(string $projectRoot): void
     {
+        $claudeDir = sprintf('%s/.claude', $projectRoot);
+        if (!is_dir($claudeDir)) {
+            mkdir($claudeDir, 0755, true);
+        }
+
         $settingsPath = sprintf('%s/.claude/settings.local.json', $projectRoot);
 
         $config = [];

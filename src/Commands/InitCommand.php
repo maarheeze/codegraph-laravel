@@ -11,17 +11,20 @@ use Webmozart\Assert\Assert;
 
 final class InitCommand extends Command
 {
-    protected $signature = 'codegraph:init {--mcp-config=auto : MCP server configuration (auto, sail, docker, php)}';
-    protected $description = 'Initialize CodeGraph database and register MCP server';
+    protected $signature = 'codegraph:init
+        {--mcp : Register the MCP server instead of using the CLI}
+        {--mcp-config=auto : MCP server configuration (auto, sail, docker, php)}';
+    protected $description = 'Initialize CodeGraph database';
 
     public function handle(Application $app): int
     {
         $basePath = $app->basePath();
+        $registerMcp = (bool) $this->option('mcp');
         $mcpConfig = $this->option('mcp-config');
         Assert::string($mcpConfig);
 
         $service = new LaravelInitializationService();
-        $result = $service->run($basePath, $mcpConfig);
+        $result = $service->run($basePath, $registerMcp, $mcpConfig);
 
         if ($result['error'] !== null) {
             $this->error($result['error']);
@@ -32,11 +35,13 @@ final class InitCommand extends Command
             $this->line($line);
         }
 
-        $this->call('vendor:publish', [
-            '--provider' => 'Maarheeze\\CodeGraph\\Laravel\\LaravelServiceProvider',
-            '--tag' => 'ai-routes',
-            '--force' => true,
-        ]);
+        if ($registerMcp) {
+            $this->call('vendor:publish', [
+                '--provider' => 'Maarheeze\\CodeGraph\\Laravel\\LaravelServiceProvider',
+                '--tag' => 'ai-routes',
+                '--force' => true,
+            ]);
+        }
 
         return self::SUCCESS;
     }
