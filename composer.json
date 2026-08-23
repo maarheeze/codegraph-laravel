@@ -28,21 +28,21 @@
         }
     },
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "ext-json": "*",
         "ext-pdo": "*",
         "ext-pdo_sqlite": "*",
         "illuminate/console": "^13.0",
         "illuminate/support": "^13.0",
-        "laravel/mcp": "^0.7.1",
-        "maarheeze/codegraph": "^2.0",
+        "laravel/mcp": "^0.9.4",
+        "maarheeze/codegraph": "^3.0",
         "nikic/php-parser": "^5.7",
         "webmozart/assert": "^2.4"
     },
     "require-dev": {
-        "maarheeze/phpcs": "^1.0",
+        "maarheeze/phpcs": "^2.0",
         "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^12"
+        "phpunit/phpunit": "^13.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
